@@ -181,12 +181,8 @@ func newCache[K comparable, V any](o *Options[K, V]) *cache[K, V] {
 
 	c.withEviction = withEviction
 	if c.withEviction {
-		var expectedSize uint64
-		if o.hasInitialCapacity() {
-			//nolint:gosec // there's no overflow
-			expectedSize = min(maximum, uint64(o.getInitialCapacity()))
-		}
-		c.evictionPolicy = newPolicy[K, V](withWeight, expectedSize, c.evictNode)
+		// bench: InitialCapacity sizes the hash table only; the sketch grows with the weighted size.
+		c.evictionPolicy = newPolicy[K, V](withWeight, 0, c.evictNode)
 	}
 
 	if o.ExpiryCalculator != nil {
